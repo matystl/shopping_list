@@ -1,14 +1,27 @@
-<a href="https://este.herokuapp.com/"><img alt="Este.js" src="https://cloud.githubusercontent.com/assets/66249/6515265/b91f0fb8-c388-11e4-857e-c90902e0b7a1.png" width="200"></a>
+# Shopping list
 
-[![Circle CI](https://circleci.com/gh/steida/este.svg?style=svg)](https://circleci.com/gh/steida/este)
-[![Join the chat at https://gitter.im/steida/este](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/steida/este)
-[![Dependency Status](https://david-dm.org/steida/este.png)](https://david-dm.org/steida/este)
-[![devDependency Status](https://david-dm.org/steida/este/dev-status.png)](https://david-dm.org/steida/este#info=devDependencies)
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+How to run it
+  1. Clone the repo
+  2. `npm install` (if fails try more times)
+  3. install postgre
+  4. initialize postgre
 
-> Robust and comfortable dev stack for isomorphic web apps. Forget about [evil frameworks](http://tomasp.net/blog/2015/library-frameworks/), learn laser focused libraries and patterns instead.
+      create user skill with password skill (optionaly change config in `src/server/config.js:dbConnectionString: your_connection_string`)
 
-> Forget about PHP, Ruby, Angular, Backbone, whatever client/server only solution. Also, you don't need another me-too-flux library, vanilla Flux is enough. This dev stack is web dev panacea, at least for me :-)
+      create db `todo_list`
+      
+      create table with `CREATE TABLE items(id serial primary key, todo_id  UUID NOT NULL, text text, checked boolean);`
+      
+5. run with `gulp`
+
+most of custom code is in `src/cliet/chat`
+
+after start of application click to 3. link `Open new todo list in new tab` this will create new todo list. Copy url to different tab. Write to last input box and see it synchronized. Open `psql -U skill` and run query `SELECT * from items;` to see that it's saved in db. Check server side rendering(open todo list in tab with disabled javascript and see that it has been loaded with item).
+
+Currently is supported only items created when todo list is inicialized so no new items. Howewer if you want to have more than 1 item modify `src/server/handlers/newTodoList.js` and create in inicialization more items.
+
+Maty
+
 
 ## Techniques
 
