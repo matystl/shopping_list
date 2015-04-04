@@ -7,6 +7,7 @@ import config from './config';
 import initialState from './initialstate';
 import routes from '../client/routes';
 import {state} from '../client/state';
+import pgConnect from './pgConnect';
 
 export default function render(req, res, locale) {
   const path = req.path;
@@ -18,7 +19,34 @@ function loadData(path, locale) {
   // TODO: Preload and merge user specific state.
   const appState = initialState;
   return new Promise((resolve, reject) => {
-    resolve(appState);
+    console.log(`resolving path ${path}`);
+    const tryMatch = path.match("/chat/(.*)");
+    if (tryMatch) {
+      const todoId = tryMatch[1];
+      console.log(`matched want to get ${todoId}`);
+      pgConnect((err, client, done) => {
+        if(err) {
+          reject(err);
+          return console.error('error fetching client from pool', err);
+        };
+        client.query('SELECT * FROM items WHERE todo_id = $1', [todoId], function(err, result) {
+            done();
+            if (err) {
+              console.log(err);
+            } else {
+              const parsedRes = JSON.parse(JSON.stringify(result.rows));
+              appState[`newTodos`] = parsedRes;
+              console.log(`parsed result ${parsedRes}`);
+            }
+            client.end();
+            resolve(appState);
+          }
+        );
+      });
+    } else {
+      resolve(appState);
+    }
+
   });
 }
 
@@ -61,7 +89,9 @@ function getPageHtml(Handler, appState) {
     <script>
       (function() {
         window._appState = ${JSON.stringify(appState)};
-        var app = document.createElement('script'); app.type = 'text/javascript'; app.async = true;
+        var app = document.createElement('script');
+        app.type = 'text/javascript';
+        app.async = true;
         var src = '${appScriptSrc}';
         // IE<11 and Safari need Intl polyfill.
         if (!window.Intl) src = src.replace('.js', 'intl.js');

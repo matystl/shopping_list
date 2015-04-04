@@ -30,7 +30,11 @@ export function addHundredTodos() {
   dispatch(addHundredTodos);
 }
 
+export function newMessageFromServer(message) {
+  dispatch(addHundredTodos, message);
+}
+
 // Override actions toString for logging.
 setToString('todos', {
-  onNewTodoFieldChange, addTodo, deleteTodo, clearAll, addHundredTodos
+  onNewTodoFieldChange, addTodo, deleteTodo, clearAll, addHundredTodos, newMessageFromServer
 });

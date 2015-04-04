@@ -37,6 +37,9 @@ export default class App extends React.Component {
             <ul>
               <li><Link to="home">Home</Link></li>
               <li><Link to="todos">Todos</Link></li>
+              <li><a href="/newTodoList/" target="_blank">Open new todo list in new tab</a></li>
+              <li><Link to="chat" params={{id: 1}}>Chat 1</Link></li>
+              <li><Link to="chat" params={{id: 2}}>Chat 2</Link></li>
               <li><Link to="me">Me (protected)</Link></li>
               {!isLoggedIn() &&
                 <li><Link to="login">Login</Link></li>}

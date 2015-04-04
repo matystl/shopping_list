@@ -5,7 +5,7 @@ import TodoList from './todolist';
 import {FormattedMessage} from 'react-intl';
 import {Link} from 'react-router';
 import {addHundredTodos, clearAll} from '../../todos/actions';
-import {getNewTodo, getTodos} from '../../todos/store';
+import {getNewTodo, getTodos} from '../../todos/store_get';
 import {msg} from '../../intl/store';
 import {state} from '../../state';
 

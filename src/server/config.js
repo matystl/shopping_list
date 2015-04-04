@@ -10,6 +10,7 @@ module.exports = {
     // Server restarting invalidates require cache, no more stale html.
     hook: true
   },
+  dbConnectionString: "postgres://skill:skill@localhost/todo_list",
   port: process.env.PORT || 8000,
   version: require('../../package').version,
   webpackStylesExtensions: ['css', 'less', 'sass', 'scss', 'styl']

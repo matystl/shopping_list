@@ -28,5 +28,10 @@ export default {
   ],
   user: {
     authData: null
-  }
+  },
+  chat: {
+    title: ''
+  },
+  newTodos: [
+  ],
 }

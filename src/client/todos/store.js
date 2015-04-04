@@ -3,8 +3,15 @@ import {Range, Record} from 'immutable';
 import {getRandomString} from '../../lib/getrandomstring';
 import {newTodoCursor, todosCursor} from '../state';
 import {register} from '../dispatcher';
+import {socket} from '../socket';
+
+console.log("Is store created on server?");
 
 // Isomorphic store has to be state-less.
+
+socket.on('new chat', function(msg){
+   console.log(msg);
+ });
 
 const TodoItem = Record({
   id: '',
@@ -20,6 +27,7 @@ export const dispatchToken = register(({action, data}) => {
       // Always use destructing vars. It's explicit.
       const {name, value} = data;
       newTodoCursor(todo => todo.set(name, value));
+      socket.emit('chat message', {"name":name, "value":value});
       break;
 
     case actions.addTodo:
@@ -56,11 +64,3 @@ export const dispatchToken = register(({action, data}) => {
   }
 
 });
-
-export function getNewTodo() {
-  return newTodoCursor();
-}
-
-export function getTodos() {
-  return todosCursor();
-}
