@@ -1,24 +1,41 @@
 import React from 'react';
 import {Link} from 'react-router';
-import {openTodo, closeTodo, onNewTodoFieldChange, onEditItemText} from './actions';
-import {getNewTodo, getItems} from './store_get';
+import {openTodo, closeTodo, onNewTodoFieldChange, onEditItemText, onAddItem} from './actions';
+import {getNewTodo, getItems, getFocus} from './store_get';
 
 
 
 class TodoItem extends React.Component {
+  //not used right now
+  onKeyPressed(e) {
+    if (e.key === `Enter`) {
+      console.log(`I pressed eneter`);
+    }
+    e.stopPropagation();
+  }
+
   render() {
     const todo = this.props.todo;
     return (
       <li>
         <span>{(todo.get('checked'))? 'X' : 'O'}</span>
+        <span>{(this.props.focus)? 'F' : 'f'}</span>
         <input
+          ref="textInput"
           className="new-todo"
           name="text"
+          onKeyPress={(_) => onAddItem(_, todo.get("id"))}
           onChange={(_) => onEditItemText(_, todo.get("id"))}
           value={todo.get('text')}
         />
       </li>
     );
+  }
+
+  componentDidMount() {
+    if (this.props.focus) {
+      React.findDOMNode(this.refs.textInput).focus();
+    }
   }
 }
 
@@ -26,10 +43,12 @@ class TodoList extends React.Component {
  render() {
    console.log('This is my props');
    console.log(this.props.todos);
+   const focusId = getFocus();
    return (
      <ol>
        {this.props.todos.map((todo) => {
-         return <TodoItem todo={todo} key={todo.get('id')} />;
+         const id = todo.get('id');
+         return <TodoItem todo={todo} key={id} focus={focusId === id} />;
        })}
      </ol>
    );

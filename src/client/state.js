@@ -14,3 +14,8 @@ export const todosCursor = state.cursor(['todos']);
 export const userCursor = state.cursor(['user']);
 export const chatCursor = state.cursor(['chat']);
 export const getItemsCursor = state.cursor(['newTodos']);
+
+export const curServerIdMapping = state.cursor(['serverIdMapping']);
+export const curFocus = state.cursor(['focus']);
+export const curPendingActions = state.cursor(['pendingActions']);
+export const curItemsOrder = state.cursor(['itemsOrder']);

@@ -53,24 +53,56 @@ export default function() {
       socket.room = null;
     });
 
+    socket.on('add item', (msg) => {
+      const clientId = msg;
+      console.log(`1. want updated item ${JSON.stringify(msg)}`);
+      if (socket.room) {
+        console.log(`2. i am in room ${socket.room}`);
+        pgConnect((err, client, done) => {
+          client.query(
+            'INSERT into items (id, todo_id, text, checked) VALUES($1, $2, $3, $4) RETURNING id',
+            [clientId, socket.room, '', false],
+            function(err, result) {
+              const resId = result.rows[0].id;
+              console.log(`3. after query 1 ${JSON.stringify(result)} with id ${resId}`);
+
+              client.query(
+                'SELECT * FROM items WHERE todo_id = $1',
+                [socket.room],
+                function(err, result) {
+                  console.log(`4. after query 1 `);
+                  done();
+                  const newItems = JSON.parse(JSON.stringify(result.rows));
+                  socket.broadcast.to(socket.room).emit('new items', newItems);
+                  socket.emit('confirm new items', newItems);
+                  client.end();
+              });
+            }
+          );
+        });
+      } else {
+        console.log(`1.5 socket is not in room`);
+      }
+    });
+
     socket.on('edit item', (msg) => {
       const {id, value} = msg;
       console.log(`1. want updated item ${id} ${value} ${JSON.stringify(msg)}`);
       if (socket.room) {
-        console.log(`2. i am in room ${id}`);
+        console.log(`2. i am in room ${socket.room}`);
         pgConnect((err, client, done) => {
           client.query(
             'UPDATE items SET text = $1 WHERE id = $2;',
             [value, id],
             function(err, result) {
-              console.log(`3. after query 1 ${id}`);
+              console.log(`3. after query 1 ${JSON.stringify(result)}`);
 
               client.query('SELECT * FROM items WHERE todo_id = (SELECT todo_id FROM items WHERE id = $1)', [id], function(err, result) {
                   console.log(`4. after query 1 ${id}`);
                   done();
                   const newItems = JSON.parse(JSON.stringify(result.rows));
                   socket.broadcast.to(socket.room).emit('new items', newItems);
-                  socket.emit('new items', newItems);
+                  socket.emit('confirm new items', newItems);
                   client.end();
               });
             }
