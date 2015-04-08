@@ -1,20 +1,17 @@
-import App from './components/app';
-import Home from './components/home';
-import Login from './components/login';
-import Me from './components/me';
-import NotFound from './components/notfound';
-import Chat from './chat/Chat';
 import React from 'react';
-import Todos from './components/todos';
 import {DefaultRoute, NotFoundRoute, Route} from 'react-router';
+
+//import custom components
+
+import App from './components/App';
+import Home from './components/Home';
+import NotFound from './components/Notfound';
+import Chat from './chat/Chat';
 
 export default (
   <Route handler={App} path="/">
     <DefaultRoute handler={Home} name="home" />
     <NotFoundRoute handler={NotFound} name="not-found" />
-    <Route handler={Login} name="login" />
     <Route handler={Chat} name="chat" path='chat/:id'/>
-    <Route handler={Me} name="me" />
-    <Route handler={Todos} name="todos" />
   </Route>
 );

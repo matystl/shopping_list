@@ -12,8 +12,7 @@ export default class Home extends React.Component {
     return (
       <div>
         <p>
-          App starter kit2 for <a href="https://github.com/steida/este">
-          Este.js</a>. Check <Link to="todos">todos</Link>.
+          This is simple inner component of home.
         </p>
       </div>
     );
