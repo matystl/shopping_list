@@ -10,9 +10,11 @@ How to run it
 
       create db `todo_list`
       
-      create table with `CREATE TABLE items(id serial primary key, todo_id  UUID NOT NULL, text text, checked boolean);`
+      create table for items with `CREATE TABLE items(db_id serial primary key, id UUID NOT NULL, todo_id UUID NOT NULL, text text, checked boolean);`
       
-5. run with `gulp`
+      create table for order with `CREATE TABLE items_order(db_id serial primary key, todo_id UUID NOT NULL, order UUID ARRAY);`
+      
+  5. run with `gulp`
 
 most of custom code is in `src/cliet/chat`
 
