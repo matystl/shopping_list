@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 import {openTodo, closeTodo, onNewTodoFieldChange, onEditItemText, onAddItem} from './actions';
-import {getNewTodo, getItems, getFocus} from './store_get';
+import {getNewTodo, getItems, getFocus, getOrderedItems} from './store_get';
 
 
 
@@ -28,6 +28,7 @@ class TodoItem extends React.Component {
           onChange={(_) => onEditItemText(_, todo.get("id"))}
           value={todo.get('text')}
         />
+        <span>{todo.get('id')}</span>
       </li>
     );
   }
@@ -63,7 +64,7 @@ export default class Chat extends React.Component {
 
   componentWillMount() {
     console.log(`WTFFFFFF`);
-    console.log(JSON.stringify(getItems()));
+    console.log(JSON.stringify(getOrderedItems()));
     this.chatId = this.context.router.getCurrentParams().id;
     console.log("Test mountu chat "+ this.chatId);
   }
@@ -89,7 +90,7 @@ export default class Chat extends React.Component {
           />
           <br/>
           Todos:
-          <TodoList todos={getItems()} />
+          <TodoList todos={getOrderedItems()} />
           Check <Link to="home">home</Link>.
         </p>
       </div>

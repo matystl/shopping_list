@@ -9,6 +9,9 @@ import favicon from 'serve-favicon';
 import render from './render';
 import handler_newTodoList from './handlers/newTodoList';
 import pgConnect from './pgConnect';
+import Immutable from 'immutable';
+
+
 export default function() {
 
   const app = express();
@@ -54,8 +57,11 @@ export default function() {
     });
 
     socket.on('add item', (msg) => {
-      const clientId = msg;
       console.log(`1. want updated item ${JSON.stringify(msg)}`);
+      const afterId = msg.afterId;
+      const clientId = msg.id;
+      const debugId = msg.debugCounter;
+      console.log(`1.5 want updated item client Id: ${clientId} afterId: ${afterId}`);
       if (socket.room) {
         console.log(`2. i am in room ${socket.room}`);
         pgConnect((err, client, done) => {
@@ -65,17 +71,41 @@ export default function() {
             function(err, result) {
               const resId = result.rows[0].id;
               console.log(`3. after query 1 ${JSON.stringify(result)} with id ${resId}`);
-
-              client.query(
-                'SELECT * FROM items WHERE todo_id = $1',
-                [socket.room],
+              client.query('SELECT * FROM items_order WHERE todo_id = $1', [socket.room], function(err, result) {
+                console.log(`4.after query for order raw ${JSON.stringify(result)}`);
+                const iOrder = Immutable.List(result.rows[0].order);
+                console.log(`4.after query for order ${iOrder}`);
+                let prevIndex = iOrder.indexOf(afterId);
+                if (prevIndex == -1) {
+                  prevIndex = iOrder.size - 1;
+                };
+                const iNewOrder =  iOrder.splice(prevIndex + 1,0, clientId);
+                console.log(`4.after query new is order ${iNewOrder}`);
+                client.query(
+                  'UPDATE items_order SET "order" = $2 WHERE todo_id = $1;',
+                  [socket.room, iNewOrder.toJS()],
                 function(err, result) {
-                  console.log(`4. after query 1 `);
-                  done();
-                  const newItems = JSON.parse(JSON.stringify(result.rows));
-                  socket.broadcast.to(socket.room).emit('new items', newItems);
-                  socket.emit('confirm new items', newItems);
-                  client.end();
+                  if (err) {
+                    console.log(`4.5 error writing new order ${err}`);
+                  } else {
+                    console.log(`4.5 writing new order succesfull ${result}`);
+                  }
+                  client.query('SELECT * FROM items_order WHERE todo_id = $1', [socket.room], function(err, result) {
+                    const iOrder = Immutable.List(result.rows[0].order);
+                    client.query(
+                      'SELECT * FROM items WHERE todo_id = $1',
+                      [socket.room],
+                      function(err, result) {
+                        console.log(`5. after query select `);
+                        done();
+                        const newItems = JSON.parse(JSON.stringify(result.rows));
+                        const result = {order: iOrder, items: newItems, debugCounter:debugId};
+                        socket.broadcast.to(socket.room).emit('new items', result);
+                        socket.emit('confirm new items', result);
+                        client.end();
+                    });
+                  });
+                });
               });
             }
           );
@@ -87,6 +117,8 @@ export default function() {
 
     socket.on('edit item', (msg) => {
       const {id, value} = msg;
+      const debugId = msg.debugCounter;
+      console.log(`debuj id ${debugId}`);
       console.log(`1. want updated item ${id} ${value} ${JSON.stringify(msg)}`);
       if (socket.room) {
         console.log(`2. i am in room ${socket.room}`);
@@ -96,14 +128,17 @@ export default function() {
             [value, id],
             function(err, result) {
               console.log(`3. after query 1 ${JSON.stringify(result)}`);
-
-              client.query('SELECT * FROM items WHERE todo_id = (SELECT todo_id FROM items WHERE id = $1)', [id], function(err, result) {
-                  console.log(`4. after query 1 ${id}`);
-                  done();
-                  const newItems = JSON.parse(JSON.stringify(result.rows));
-                  socket.broadcast.to(socket.room).emit('new items', newItems);
-                  socket.emit('confirm new items', newItems);
-                  client.end();
+              client.query('SELECT * FROM items_order WHERE todo_id = $1', [socket.room], function(err, result) {
+                const iOrder = Immutable.List(result.rows[0].order);
+                client.query('SELECT * FROM items WHERE todo_id = (SELECT todo_id FROM items WHERE id = $1)', [id], function(err, result) {
+                    console.log(`4. after query 1 ${id}`);
+                    done();
+                    const newItems = JSON.parse(JSON.stringify(result.rows));
+                    const result = {test:true, order: iOrder, items: newItems, debugCounter: debugId};
+                    socket.broadcast.to(socket.room).emit('new items', result);
+                    socket.emit('confirm new items', result);
+                    client.end();
+                });
               });
             }
           );

@@ -49,7 +49,7 @@ function loadData(path, locale) {
                 } else {
                   const parsedRes = JSON.parse(JSON.stringify(result.rows));
                   console.log(`parsed result ${JSON.stringify(parsedRes)}`);
-                  const order = JSON.stringify(parsedRes[0].order);
+                  const order = JSON.parse(JSON.stringify(parsedRes[0].order));
                   console.log(`parsed result ${order}`);
                   appState[`itemsOrder`] = order;
                   resolve(appState);
