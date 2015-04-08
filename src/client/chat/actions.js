@@ -1,6 +1,15 @@
 import setToString from '../../lib/settostring';
 import {dispatch} from '../dispatcher';
 
+
+export function syncStartTodo(todoId) {
+  dispatch(syncStartTodo, todoId);
+}
+
+export function syncStopTodo(todoId) {
+  dispatch(syncStopTodo, todoId);
+}
+
 export function onEditItemText({target: {name, value}}, itemId) {
   switch (name) {
     case 'text':
@@ -10,36 +19,22 @@ export function onEditItemText({target: {name, value}}, itemId) {
   dispatch(onEditItemText, {itemId, value});
 }
 
-export function onNewTodoFieldChange({target: {name, value}}) {
-  switch (name) {
-    case 'title':
-      value = value.slice(0, 40);
-      break;
+export function onAddItem(e, prevItemId) {
+  if (e.key === `Enter`) {
+    console.log(`I pressed eneter`);
+    dispatch(onAddItem, prevItemId);
   }
-  dispatch(onNewTodoFieldChange, {name, value});
+  e.stopPropagation();
 }
 
-export function newItemsFromServer(msg) {
-  dispatch(newItemsFromServer, msg);
+export function onNewItemsFromServer(msg, decreasePendingActions) {
+  dispatch(onNewItemsFromServer, {msg, decreasePendingActions});
 }
 
-export function messageFromServer(msg) {
-  dispatch(messageFromServer, msg);
-}
 
-export function openTodo(todoId) {
-  dispatch(openTodo, todoId);
-}
-
-export function closeTodo(todoId) {
-  dispatch(closeTodo, todoId);
-}
-
-export function newMessageFromServer(message) {
-  dispatch(newMessageFromServer, message);
-}
 
 // Override actions toString for logging.
 setToString('chat', {
-  newMessageFromServer, openTodo, closeTodo, onNewTodoFieldChange, messageFromServer, onEditItemText, newItemsFromServer
+  syncStartTodo, syncStopTodo,
+  onEditItemText, onNewItemsFromServer, onAddItem
 });

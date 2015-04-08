@@ -34,4 +34,9 @@ export default {
   },
   newTodos: [
   ],
+  focus: null,
+  pendingActions:0,
+  itemsOrder: [
+  ],
+  test: 15,
 }

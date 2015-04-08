@@ -1,7 +1,6 @@
 import DocumentTitle from 'react-document-title';
 import React from 'react';
 import {Link, RouteHandler} from 'react-router';
-import {isLoggedIn} from '../user/store';
 import {state} from '../state';
 
 // Leverage webpack require goodness for feature toggle based dead code removal.
@@ -28,29 +27,17 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <DocumentTitle title='Este.js App'>
+      <DocumentTitle title='Simple todo list'>
         <div className="page">
           <header>
             <h1>
-              <a href="https://github.com/steida/este">Este.js</a> App
+              Simple todo list
             </h1>
             <ul>
-              <li><Link to="home">Home</Link></li>
-              <li><Link to="todos">Todos</Link></li>
               <li><a href="/newTodoList/" target="_blank">Open new todo list in new tab</a></li>
-              <li><Link to="chat" params={{id: 1}}>Chat 1</Link></li>
-              <li><Link to="chat" params={{id: 2}}>Chat 2</Link></li>
-              <li><Link to="me">Me (protected)</Link></li>
-              {!isLoggedIn() &&
-                <li><Link to="login">Login</Link></li>}
             </ul>
           </header>
           <RouteHandler />
-          <footer>
-            <p>
-              made by <a href="https://twitter.com/steida">steida</a>
-            </p>
-          </footer>
         </div>
       </DocumentTitle>
     );
