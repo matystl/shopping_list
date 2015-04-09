@@ -7,7 +7,7 @@ import config from './config';
 import initialState from './initialstate';
 import routes from '../client/routes';
 import {state} from '../client/state';
-import pgConnect from './pgConnect';
+import pgQuery from './pgConnect';
 import Immutable from 'immutable';
 
 export default function render(req, res, locale) {
@@ -25,40 +25,21 @@ function loadData(path, locale) {
     if (tryMatch) {
       const todoId = tryMatch[1];
       console.log(`matched want to get ${todoId}`);
-      pgConnect((err, client, done) => {
-        if(err) {
-          reject(err);
-          return console.error('error fetching client from pool', err);
-        };
-        client.query('SELECT * FROM items WHERE todo_id = $1', [todoId], function(err, result) {
-
-            if (err) {
-              done();
-              console.log(err);
-              client.end();
-            } else {
-
-              const parsedRes = JSON.parse(JSON.stringify(result.rows));
-              appState[`newTodos`] = parsedRes;
-              console.log(`parsed result ${parsedRes}`);
-
-              client.query('SELECT * FROM items_order WHERE todo_id = $1', [todoId], function(err, result) {
-                done();
-                if (err) {
-                  console.log(`error retrieving order ${err}`);
-                } else {
-                  const parsedRes = JSON.parse(JSON.stringify(result.rows));
-                  console.log(`parsed result ${JSON.stringify(parsedRes)}`);
-                  const order = JSON.parse(JSON.stringify(parsedRes[0].order));
-                  console.log(`parsed result ${order}`);
-                  appState[`itemsOrder`] = order;
-                  resolve(appState);
-                  client.end();
-                }
-              });
-            }
-          }
-        );
+      pgQuery('SELECT * FROM items WHERE todo_id = $1', [todoId])
+      .then((result) => {
+        const parsedRes = JSON.parse(JSON.stringify(result.rows));
+        appState[`newTodos`] = parsedRes;
+        console.log(`parsed result ${parsedRes}`);
+        return pgQuery('SELECT * FROM items_order WHERE todo_id = $1', [todoId]);
+      }).then((result) => {
+        const parsedRes = JSON.parse(JSON.stringify(result.rows));
+        console.log(`parsed result ${JSON.stringify(parsedRes)}`);
+        const order = JSON.parse(JSON.stringify(parsedRes[0].order));
+        console.log(`parsed result ${order}`);
+        appState[`itemsOrder`] = order;
+        resolve(appState);
+      }).catch((e) => {
+        reject(e);
       });
     } else {
       resolve(appState);

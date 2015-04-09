@@ -4,6 +4,7 @@ import Immutable from 'immutable';
 export default class State extends EventEmitter {
 
   constructor(state, reviver: ?Function) {
+    this._willFireChange = false;
     this._state = null;
     this._reviver = reviver;
     this.load(state || {});
@@ -16,10 +17,18 @@ export default class State extends EventEmitter {
     );
   }
 
+
   set(state) {
     if (this._state === state) return;
     this._state = state;
     this.emit('change', this._state);
+    // if (!this._willFireChange) {
+    //   this._willFireChange = true;
+    //   setTimeout(() => {
+    //     this._willFireChange = false;
+    //     this.emit('change', this._state);
+    //   }, 0);
+    // }
   }
 
   get() {

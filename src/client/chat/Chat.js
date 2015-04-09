@@ -1,11 +1,23 @@
 import React from 'react';
 import {Link} from 'react-router';
-import {syncStartTodo, syncStopTodo, onEditItemText, onAddItem} from './actions';
-import {getNewTodo, getItems, getFocus, getOrderedItems} from './store_get';
+import {syncStartTodo, syncStopTodo, onEditItemText, onTodoInputKeyDown, onFocus} from './actions';
+import {getNewTodo, getItems, getFocus, getOrderedItems, getPendingActions} from './store_get';
 
 
 
 class TodoItem extends React.Component {
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.focus !== this.props.focus && this.props.focus) {
+      React.findDOMNode(this.refs.textInput).focus();
+    }
+  };
+
+  componentDidMount() {
+    if (this.props.focus) {
+      React.findDOMNode(this.refs.textInput).focus();
+    }
+  }
 
   render() {
     const todo = this.props.todo;
@@ -17,7 +29,8 @@ class TodoItem extends React.Component {
           ref="textInput"
           className="new-todo"
           name="text"
-          onKeyPress={(_) => onAddItem(_, todo.get("id"))}
+          onKeyDown={(_) => onTodoInputKeyDown(_, todo.get("id"))}
+          onFocus={(_) => onFocus(todo.get("id"))}
           onChange={(_) => onEditItemText(_, todo.get("id"))}
           value={todo.get('text')}
         />
@@ -25,17 +38,12 @@ class TodoItem extends React.Component {
       </li>
     );
   }
-
-  componentDidMount() {
-    if (this.props.focus) {
-      React.findDOMNode(this.refs.textInput).focus();
-    }
-  }
 }
 
 class TodoList extends React.Component {
  render() {
-   console.log(`This is my props for TodoList ${this.props.todos}`);
+   console.log(`render called on TodoList`);
+   //console.log(`This is my props for TodoList ${this.props.todos}`);
    const focusId = getFocus();
    return (
      <ol>
@@ -72,7 +80,7 @@ export default class Chat extends React.Component {
         <p>
           This is todo list with id {this.chatId}
           <br/>
-          Todos:
+          Todos: Pending actions {getPendingActions()}
           <TodoList todos={getOrderedItems()} />
           <br/>
           <Link to="home">home</Link>.

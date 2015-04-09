@@ -23,6 +23,24 @@ socket.on('confirm new items', function(msg){
 export const dispatchToken = register(({action, data}) => {
   switch (action) {
 
+    case actions.onFocus: {
+      const id = data;
+      curFocus((_) => id);
+      break;
+    }
+
+    case actions.onMove: {
+      const prevItemId = data.id;
+      const direction = data.direction;
+      const order = curItemsOrder();
+      const prevInder = order.indexOf(prevItemId) + direction;
+      console.log(`what is my index ${prevInder}`);
+      if (prevInder >= 0 && prevInder < order.size) {
+        curFocus((_) => order.get(prevInder));
+      }
+      break;
+    };
+
     case actions.syncStartTodo: {
       console.log(`Will start syncinc todo ${data}`);
       socket.emit(`join room`, data);
@@ -65,8 +83,8 @@ export const dispatchToken = register(({action, data}) => {
       curItems((items) => items.map((item) => (item.get("id") == itemId)? item.set("text", value): item));
       debugCounter++;
       console.log(`\t increase counter edit items ${curPendingActions()}  debug counter ${debugCounter}`);
-      curPendingActions((c) => c+1);
       socket.emit(`edit item`, {id: itemId, value: value, debugCounter: debugCounter});
+      curPendingActions((c) => c+1);
       break;
     };
 
