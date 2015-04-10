@@ -20,6 +20,7 @@ export function onEditItemText({target: {name, value}}, itemId) {
 
 
 export function onTodoInputKeyDown(e, prevItemId) {
+  let disableDefault = true;
   if (e.key === `Enter`) {
     onAddItem(prevItemId);
   } else if (e.key === `ArrowUp`) {
@@ -27,11 +28,26 @@ export function onTodoInputKeyDown(e, prevItemId) {
   } else if (e.key === `ArrowDown`) {
     onMove(prevItemId, +1);
     console.log(`I pressed down`);
+  } else if (e.key === `Backspace`) {
+    console.log(`Backspace ${e.target.value}`);
+    if (e.target.value === ``) {
+      onDeleteItem(prevItemId)
+    } else {
+      disableDefault = false;
+    }
+    //onDeleteItem(prevItemId);
   } else {
-    return;
+    disableDefault = false;
+    console.log(`I pressed ${e.key}`);
   };
-  e.stopPropagation();
-  e.preventDefault();
+  if (disableDefault) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+}
+
+export function onDeleteItem(itemId) {
+  dispatch(onDeleteItem, itemId);
 }
 
 export function onFocus(itemId) {
@@ -56,6 +72,6 @@ export function onNewItemsFromServer(msg, decreasePendingActions) {
 
 // Override actions toString for logging.
 setToString('chat', {
-  syncStartTodo, syncStopTodo,
+  syncStartTodo, syncStopTodo, onDeleteItem,
   onEditItemText, onNewItemsFromServer, onAddItem, onMove, onFocus
 });

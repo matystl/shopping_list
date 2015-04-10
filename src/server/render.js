@@ -7,7 +7,7 @@ import config from './config';
 import initialState from './initialstate';
 import routes from '../client/routes';
 import {state} from '../client/state';
-import pgQuery from './pgConnect';
+import {pgQuery} from './pgConnect';
 import Immutable from 'immutable';
 
 export default function render(req, res, locale) {
@@ -28,12 +28,12 @@ function loadData(path, locale) {
       pgQuery('SELECT * FROM items WHERE todo_id = $1', [todoId])
       .then((result) => {
         const parsedRes = JSON.parse(JSON.stringify(result.rows));
+        console.log(`parsed result of items get ${parsedRes}`);
         appState[`newTodos`] = parsedRes;
-        console.log(`parsed result ${parsedRes}`);
         return pgQuery('SELECT * FROM items_order WHERE todo_id = $1', [todoId]);
       }).then((result) => {
         const parsedRes = JSON.parse(JSON.stringify(result.rows));
-        console.log(`parsed result ${JSON.stringify(parsedRes)}`);
+        console.log(`parsed result of items order ${JSON.stringify(parsedRes)}`);
         const order = JSON.parse(JSON.stringify(parsedRes[0].order));
         console.log(`parsed result ${order}`);
         appState[`itemsOrder`] = order;

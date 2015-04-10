@@ -43,18 +43,15 @@ export const dispatchToken = register(({action, data}) => {
 
     case actions.syncStartTodo: {
       console.log(`Will start syncinc todo ${data}`);
-      socket.emit(`join room`, data);
+      socket.emit(`sync todo`, data);
       break;
     };
 
     case actions.syncStopTodo: {
-      const x = 8;
       console.log(`Will stop syncinc todo ${data}`);
-      socket.emit(`leave room`, data);
+      socket.emit(`unsync todo`, data);
       break;
     };
-
-
 
     case actions.onAddItem: {
       const prevItemId = data;
@@ -77,6 +74,31 @@ export const dispatchToken = register(({action, data}) => {
     };
 
 
+    case actions.onDeleteItem: {
+      const id = data;
+      console.log(`remove item with id ${id}`);
+      curItems((items) => items.filter((item) => (item.get("id") !== id)));
+      let prevItemId;
+      curItemsOrder((order) => {
+        const itemIndex = order.indexOf(id);
+        if (itemIndex == 0) {
+          prevItemId = order.get(1);
+        } else {
+          prevItemId = order.get(itemIndex-1);
+        }
+        return order.splice(itemIndex, 1);
+      });
+      curFocus((_) => prevItemId);
+      debugCounter++;
+      console.log(`\t increase counter add items current ${curPendingActions()} debug counter ${debugCounter}`);
+      curPendingActions((c) => c+1);
+      console.log(`items: ${JSON.stringify(curItems())}`);
+      console.log(`items order: ${JSON.stringify(curItems())}`);
+      socket.emit(`delete item`, {id: id, debugCounter: debugCounter});
+      break;
+    };
+
+
     case actions.onEditItemText: {
       const {itemId, value} = data;
       console.log(`item id ${itemId} val ${value}`);
@@ -87,7 +109,6 @@ export const dispatchToken = register(({action, data}) => {
       curPendingActions((c) => c+1);
       break;
     };
-
 
     case actions.onNewItemsFromServer: {
       const {msg, decreasePendingActions} = data;
